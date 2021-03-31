@@ -1,0 +1,15 @@
+cluster.name: "es"
+node.name: "es-node3"
+node.master: true
+node.data: true
+node.max_local_storage_nodes: 3
+
+network.host: 0.0.0.0
+network.publish_host: 192.168.15.68
+discovery.seed_hosts: ["192.168.15.68:9301", "192.168.15.68:9302","192.168.15.68:9303"]
+cluster.initial_master_nodes: ["es-node1", "es-node2", "es-node3"]
+discovery.zen.minimum_master_nodes: 1
+http.cors.enabled: true
+http.cors.allow-origin: "*" 
+http.port: 9203
+transport.tcp.port: 9303
