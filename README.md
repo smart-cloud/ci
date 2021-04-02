@@ -2,23 +2,23 @@
 
 名称 | 描述
 ---|---
-gitlab | 代码管理
-git runner | gitlab内置的自动化部署工具
-harbor | docker镜像管理
-portainer | 管理docker的界面工具
+[gitlab](https://about.gitlab.com/) | 代码管理
+[git runner](https://docs.gitlab.com/runner/) | gitlab内置的自动化部署工具
+[harbor](https://github.com/goharbor/harbor) | docker镜像管理
+[portainer](https://www.portainer.io/) | 管理docker的界面工具
 
 # 二、工具安装
-## gitlab
+## （一）gitlab
 ```
 
 ```
 
-## harbor
+## （二）harbor
 ```
 
 ```
 
-## portainer
+## （三）portainer
 ```
 docker pull portainer/portainer
 
@@ -77,6 +77,6 @@ sudo docker run -d --restart=always --log-driver  json-file --log-opt max-size=1
 
 配置见/data/kibana/config/kibana.yml
 ```
-![](images/efk.png)
 
 ## （二）效果图
+![](images/efk.png)
