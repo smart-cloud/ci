@@ -9,9 +9,9 @@
 
 # 二、工具安装
 ## （一）gitlab
+### 1、安装
 ```
-docker pull gitlab/gitlab-ce
-docker network create gitlab_net
+docker pull gitlab/gitlab-ce:latest
 
 docker run -d \
 -p 18443:443 \
@@ -23,15 +23,28 @@ docker run -d \
 -v /opt/gitlab/config:/etc/gitlab \
 -v /opt/gitlab/logs:/var/log/gitlab \
 -v /opt/gitlab/data:/var/opt/gitlab \
-docker.io/beginor/gitlab-ce:11.0.1-ce.0
+gitlab/gitlab-ce:latest
+```
+### 2、修改/opt/gitlab/config/gitlab.rb
+```
+sudo vim /opt/gitlab/config/gitlab.rb
+
+将“external_url”设置为部署机器地址。如：external_url 'http://192.168.15.69'
+
+http://192.168.15.69
+root/12345678
+```
+![](images/gitlab.png)
+
+## （二）git runner
+
+
+## （三）harbor
 ```
 
-## （二）harbor
 ```
 
-```
-
-## （三）portainer
+## （四）portainer
 ### 1、安装
 ```
 docker pull portainer/portainer
