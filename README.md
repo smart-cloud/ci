@@ -10,10 +10,12 @@ portainer | 管理docker的界面工具
 # 二、工具安装
 ## gitlab
 ```
+
 ```
 
 ## harbor
 ```
+
 ```
 
 ## portainer
@@ -24,6 +26,7 @@ sudo docker volume create portainer_data
 
 sudo docker run -d -p 9000:9000 -p 8000:8000 --name portainer --restart always -v /etc/localtime:/etc/localtime:ro -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
 ```
+![](images/portainer.png)
 
 # 三、gitlab ci脚本编写
 
@@ -40,7 +43,7 @@ kibana | 展示数据
 ```
 docker pull forkdelta/fluentd-elasticsearch
 
-sudo docker service create --name hela_fluentd -p 24224:24224 -e TZ="Asia/Shanghai" --with-registry-auth --mode global --mount type=bind,src=/data/logs/application-logs,dst=/app/log --mount type=bind,src=/data/fluentd/config/fluentd.conf,dst=/fluentd/etc/fluent.conf --mount type=bind,src=/data/fluentd/config/,dst=/fluentd/data --network hela-test --update-parallelism 1 --update-delay 20s forkdelta/fluentd-elasticsearch:latest
+sudo docker service create --name smart_cloud_fluentd -p 24224:24224 -e TZ="Asia/Shanghai" --with-registry-auth --mode global --mount type=bind,src=/data/logs/application-logs,dst=/app/log --mount type=bind,src=/data/fluentd/config/fluentd.conf,dst=/fluentd/etc/fluent.conf --mount type=bind,src=/data/fluentd/config/,dst=/fluentd/data --network test --update-parallelism 1 --update-delay 20s forkdelta/fluentd-elasticsearch:latest
 
 touch fluentd.log.mall-order.pos fluentd.log.mall-product.pos luentd.log.basic-user.pos
 
@@ -69,10 +72,11 @@ sudo docker run -d --name es-node3 -p 9203:9203 -p 9303:9303 -v /data/elasticsea
 ```
 docker pull kibana:7.7.0
 
-sudo docker run -d --restart=always --log-driver  json-file --log-opt max-size=1024m --log-opt max-file=2 --name hela_kibana -p 5601:5601 -v /data/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml -e --restart=always kibana:7.7.0 
+sudo docker run -d --restart=always --log-driver  json-file --log-opt max-size=1024m --log-opt max-file=2 --name smart_cloud_kibana -p 5601:5601 -v /data/kibana/config/kibana.yml:/usr/share/kibana/config/kibana.yml -e --restart=always kibana:7.7.0 
 
 
 配置见/data/kibana/config/kibana.yml
 ```
+![](images/efk.png)
 
 ## （二）效果图
