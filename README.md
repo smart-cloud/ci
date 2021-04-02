@@ -10,7 +10,20 @@
 # 二、工具安装
 ## （一）gitlab
 ```
+docker pull gitlab/gitlab-ce
+docker network create gitlab_net
 
+docker run -d \
+-p 18443:443 \
+-p 80:80 \
+-p 12222:22 \
+--name gitlab \
+--restart always \
+--privileged=true \
+-v /opt/gitlab/config:/etc/gitlab \
+-v /opt/gitlab/logs:/var/log/gitlab \
+-v /opt/gitlab/data:/var/opt/gitlab \
+docker.io/beginor/gitlab-ce:11.0.1-ce.0
 ```
 
 ## （二）harbor
@@ -19,12 +32,24 @@
 ```
 
 ## （三）portainer
+### 1、安装
 ```
 docker pull portainer/portainer
 
 sudo docker volume create portainer_data
 
 sudo docker run -d -p 9000:9000 -p 8000:8000 --name portainer --restart always -v /etc/localtime:/etc/localtime:ro -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
+```
+### 2、暴露docker2375端口
+```
+sudo vim /lib/systemd/system/docker.service
+将原配置ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+修改为ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375 --containerd=/run/containerd/containerd.sock
+
+即新增内容：-H tcp://0.0.0.0:2375
+
+sudo systemctl daemon-reload
+sudo service docker restart
 ```
 ![](images/portainer.png)
 
