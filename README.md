@@ -7,68 +7,44 @@
 [harbor](https://github.com/goharbor/harbor) | docker镜像管理
 [portainer](https://www.portainer.io/) | 管理docker的界面工具
 
-# 二、工具安装
-## （一）gitlab
-### 1、安装
+# 二、软件安装
+基于条件限制，可用的服务器仅有三台
+服务器ip | 安装软件 | 用途 
+---|---|---
+192.168.15.67 | redis、mysql、seata、rabbitmq | 服务依赖的中间件
+192.168.15.68 | elasticsearch、kibana | 收集日志
+192.168.15.69 | gitlab、git runner、harbor、nexus、portainer | CI相关软件
+## （一）服务依赖的中间件
+### 1、redis
 ```
-docker pull gitlab/gitlab-ce:latest
+docker pull redis:5.0.5
 
-docker run -d \
--p 18443:443 \
--p 80:80 \
--p 12222:22 \
---name gitlab \
---restart always \
---privileged=true \
--v /opt/gitlab/config:/etc/gitlab \
--v /opt/gitlab/logs:/var/log/gitlab \
--v /opt/gitlab/data:/var/opt/gitlab \
-gitlab/gitlab-ce:latest
+docker run -d --name dev -p 6379:6379 -v /data/redis/dev/data:/data \
+--restart=always redis:5.0.5 redis-server --appendonly yes --requirepass "123456"
 ```
-### 2、修改/opt/gitlab/config/gitlab.rb
+### 2、mysql
 ```
-sudo vim /opt/gitlab/config/gitlab.rb
+docker pull mysql:5.7
 
-将“external_url”设置为部署机器地址。如：external_url 'http://192.168.15.69'
+创建挂载目录
+sudo mkdir -p data/mysql/conf data/mysql/data data/mysql/logs
 
-http://192.168.15.69
-root/12345678
+启动容器实例
+docker run -d -p 3306:3306 --name dev -v /data/mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf \
+ -v /data/mysql/logs:/var/log/mysql -v /data/mysql/data:/var/lib/mysql \
+ --restart=always -e MYSQL_ROOT_PASSWORD=123456 mysql:5.7
 ```
-![](images/gitlab.png)
+### 3、rabbitmq
+```
+sudo docker pull rabbitmq:3.8.6-management
 
-## （二）git runner
-
-
-## （三）harbor
+sudo docker run -d --name smart_cloud_rabbitmq -e RABBITMQ_DEFAULT_VHOST=smart_cloud_example_vhost -e RABBITMQ_DEFAULT_USER=collin -e RABBITMQ_DEFAULT_PASS=123456 -p 15672:15672 -p 5672:5672 -v /data/rabbitmq:/var/lib/rabbitmq -v /etc/localtime:/etc/localtime:ro rabbitmq:3.8.6-management
+```
+### 4、seata
 ```
 
 ```
-
-## （四）portainer
-### 1、安装
-```
-docker pull portainer/portainer
-
-sudo docker volume create portainer_data
-
-sudo docker run -d -p 9000:9000 -p 8000:8000 --name portainer --restart always -v /etc/localtime:/etc/localtime:ro -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
-```
-### 2、暴露docker2375端口
-```
-sudo vim /lib/systemd/system/docker.service
-将原配置ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
-修改为ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375 --containerd=/run/containerd/containerd.sock
-
-即新增内容：-H tcp://0.0.0.0:2375
-
-sudo systemctl daemon-reload
-sudo service docker restart
-```
-![](images/portainer.png)
-
-# 三、gitlab ci脚本编写
-
-# 四、日志收集（fluentd、elasticsearch、kibana）
+## （二）日志收集（fluentd、elasticsearch、kibana）
 
 名称 | 用途
 ---|---
@@ -76,8 +52,7 @@ fluentd | 收集日志
 elasticsearch | 存储数据
 kibana | 展示数据
 
-## （一）安装 
-### 4.1 fluentd安装
+### 1、fluentd安装
 ```
 docker pull forkdelta/fluentd-elasticsearch
 
@@ -89,7 +64,7 @@ touch fluentd.log.mall-order.pos fluentd.log.mall-product.pos luentd.log.basic-u
 各节点配置见/data/fluentd目录
 ```
 
-### 4.2 elasticsearch安装
+### 2、elasticsearch安装
 ```
 搜索镜像获取最新版本号：docker search elasticsearch
 
@@ -106,7 +81,7 @@ sudo docker run -d --name es-node3 -p 9203:9203 -p 9303:9303 -v /data/elasticsea
 各节点配置见/data/elasticsearch目录
 ```
 
-### 4.3 kibana安装
+### 3、kibana安装
 ```
 docker pull kibana:7.7.0
 
@@ -115,6 +90,66 @@ sudo docker run -d --restart=always --log-driver  json-file --log-opt max-size=1
 
 配置见/data/kibana/config/kibana.yml
 ```
-
-## （二）效果图
 ![](images/efk.png)
+
+## （三）CI
+### 1、gitlab安装
+```
+docker pull gitlab/gitlab-ce:latest
+
+docker run -d \
+-p 18443:443 \
+-p 80:80 \
+-p 12222:22 \
+--name gitlab \
+--restart always \
+--privileged=true \
+-v /opt/gitlab/config:/etc/gitlab \
+-v /opt/gitlab/logs:/var/log/gitlab \
+-v /opt/gitlab/data:/var/opt/gitlab \
+gitlab/gitlab-ce:latest
+
+
+修改/opt/gitlab/config/gitlab.rb
+sudo vim /opt/gitlab/config/gitlab.rb
+
+将“external_url”设置为部署机器地址。如：external_url 'http://192.168.15.69'
+
+访问地址：http://192.168.15.69
+账号：root/12345678
+```
+![](images/gitlab.png)
+
+### 2、git runner
+```
+
+```
+
+### 3、harbor
+```
+
+```
+
+###  4、portainer
+```
+docker pull portainer/portainer
+
+sudo docker volume create portainer_data
+
+sudo docker run -d -p 9000:9000 -p 8000:8000 --name portainer --restart always -v /etc/localtime:/etc/localtime:ro -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
+
+
+暴露docker2375端口
+sudo vim /lib/systemd/system/docker.service
+将原配置ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock
+修改为ExecStart=/usr/bin/dockerd -H fd:// -H tcp://0.0.0.0:2375 --containerd=/run/containerd/containerd.sock
+
+即新增内容：-H tcp://0.0.0.0:2375
+
+sudo systemctl daemon-reload
+sudo service docker restart
+```
+![](images/portainer.png)
+
+# 三、gitlab ci脚本编写
+
