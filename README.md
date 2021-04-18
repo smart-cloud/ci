@@ -11,7 +11,7 @@
 基于条件限制，可用的服务器仅有三台
 服务器ip | 安装软件 | 用途 
 ---|---|---
-192.168.15.67 | redis、mysql、seata、rabbitmq | 服务依赖的中间件
+192.168.15.67 | redis、mysql、seata、rabbitmq、xxl-job | 服务依赖的中间件
 192.168.15.68 | elasticsearch、kibana | 收集日志
 192.168.15.69 | gitlab、git runner、harbor、nexus、portainer | CI相关软件
 ## （一）服务依赖的中间件
@@ -63,6 +63,21 @@ sudo docker run -d --name seata-server \
 创建/data/seata/config目录，并创建registry.conf、file.conf文件。
 配置见/data/seata目录
 ```
+### 5、xxl-job
+```
+查看版本号：https://hub.docker.com/r/xuxueli/xxl-job-admin/
+
+docker pull xuxueli/xxl-job-admin:2.3.0
+
+docker run -e PARAMS="--spring.datasource.url=jdbc:mysql://192.168.15.67:3306/xxl_job?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=Asia/Shanghai --spring.datasource.username=root --spring.datasource.password=123456" -p 8080:8080 -v /tmp:/data/applogs --name xxl-job-admin -e --restart=always --privileged=true -v /etc/localtime:/etc/localtime:ro -d xuxueli/xxl-job-admin:2.3.0
+
+http://192.168.15.67:8080/xxl-job-admin
+admin/123456
+
+配置见/data/xxl-job目录
+```
+![](images/xxl-job.png)
+
 ## （二）日志收集（fluentd、elasticsearch、kibana）
 
 名称 | 用途
