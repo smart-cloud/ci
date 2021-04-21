@@ -38,11 +38,30 @@ docker run -d -p 3306:3306 --name dev -v /data/mysql/conf/my.cnf:/etc/mysql/conf
 ```
 sudo docker pull rabbitmq:3.8.6-management
 
-sudo docker run -d --name smart_cloud_rabbitmq -e RABBITMQ_DEFAULT_VHOST=smart_cloud_example_vhost -e RABBITMQ_DEFAULT_USER=collin -e RABBITMQ_DEFAULT_PASS=123456 -p 15672:15672 -p 5672:5672 -v /data/rabbitmq:/var/lib/rabbitmq -v /etc/localtime:/etc/localtime:ro rabbitmq:3.8.6-management
+sudo docker run -d --name smart_cloud_rabbitmq -e RABBITMQ_DEFAULT_VHOST=smart_cloud_example_vhost -e RABBITMQ_DEFAULT_USER=collin -e RABBITMQ_DEFAULT_PASS=123456 -p 15672:15672 -p 5672:5672 -v /data/rabbitmq:/var/lib/rabbitmq -v /etc/localtime:/etc/localtime:ro --restart=always rabbitmq:3.8.6-management
 ```
 ### 4、seata
 ```
+docker pull seataio/seata-server:latest
 
+sudo docker run -d --name seata-server \
+    -p 8091:8091 \
+    -e SEATA_CONFIG_NAME=file:/root/seata-config/registry \
+    -v /data/seata/config:/root/seata-config \
+    -v /data/seata/log:/root/log/seata \
+    -v /etc/localtime:/etc/localtime:ro \
+    --restart=always \
+	--privileged=true \
+    seataio/seata-server:latest
+
+备注：
+    registry.conf 对应的是 default
+    registry-dev.conf 对应 dev开发环境
+    registry-test.conf 对应 test测试环境
+    registry-prod.conf 对应 prod生产环境
+
+创建/data/seata/config目录，并创建registry.conf、file.conf文件。
+配置见/data/seata目录
 ```
 ## （二）日志收集（fluentd、elasticsearch、kibana）
 
@@ -136,7 +155,7 @@ docker pull portainer/portainer
 
 sudo docker volume create portainer_data
 
-sudo docker run -d -p 9000:9000 -p 8000:8000 --name portainer --restart always -v /etc/localtime:/etc/localtime:ro -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
+sudo docker run -d -p 9000:9000 -p 8000:8000 --name portainer --restart=always -v /etc/localtime:/etc/localtime:ro -v /var/run/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer
 
 
 暴露docker2375端口
